@@ -1,6 +1,7 @@
 ##Script with functions for plotting audio signals 
 
 import torch
+import librosa
 import matplotlib.pyplot as plt
 
 def plot_waveform(waveform, sample_rate):
@@ -38,4 +39,17 @@ def plot_specgram(waveform, sample_rate, file_path, title="Spectrogram", ):
     plt.gca().axes.get_xaxis().set_visible(False)
     plt.gca().axes.get_yaxis().set_visible(False)
     plt.savefig(file_path, bbox_inches='tight')
+    plt.close()
+
+def plot_mel_specgram(spec, file_path):
+    
+    fig, axs = plt.subplots(1, 1)
+    fig.set_size_inches(10,10)
+    
+    axs.imshow(librosa.power_to_db(spec), origin='lower',aspect='auto')
+
+    plt.gca().set_axis_off()
+    plt.gca().axes.get_xaxis().set_visible(False)
+    plt.gca().axes.get_yaxis().set_visible(False)
+    plt.savefig(fname=file_path, bbox_inches='tight')
     plt.close()
