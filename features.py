@@ -30,6 +30,7 @@ class Audio_Features:
 
         self._output_path = Path(output_path)
         self._raw_data = Path(data_path)
+        self._set = data_path.split("/")[-1]
         self._metadata_path = Path("./Data/metadata.csv")
         #random_filenames = self._get_filenames()
         self._save_features()
@@ -59,7 +60,7 @@ class Audio_Features:
 
         return resampled_waveform, resample_frequency
     
-    def _reshape_audio(self, waveform):
+    def _reshape_audio(self, waveform, file_name):
         """
             Initializes feature extraction routine
 
@@ -74,9 +75,12 @@ class Audio_Features:
                 wavefomr: np.array
                     Resamplled waveform 44100 Hz -> 4410 Hz
         """
-        init_cut = 1 * 44100 # To prevent rizz of touch
+        dataset_audio_size = self._metadata["num_frames"].min()
+        audio_n_frames = self._metadata['num_frames'][self._metadata.index == file_name].values
 
-        return waveform[:,init_cut:self._dataset_audio_size]
+        init_cut = abs(dataset_audio_size - audio_n_frames) # To prevent rizz of touch and make file lenght equal
+        
+        return waveform[:,init_cut[0]:]
     
     def _butterworth(self, waveform, sample_rate):
         """
@@ -143,32 +147,32 @@ class Audio_Features:
         n_files = os.listdir(self._raw_data)
         train_test = np.random.choice([0, 1], size=len(n_files), p=[1-train_proportion, train_proportion])
         
-        metadata = pd.read_csv(self._metadata_path,index_col=[0])
-        self._dataset_audio_size = metadata["num_frames"].min()
-
+        self._metadata = pd.read_csv(self._metadata_path,index_col=[0])
+        
         for idx, file in enumerate(self._raw_data.glob("*")):
 
             class_type = str(file.name).split('_')[0]
             split_path = 'train' if train_test[idx]==1 else 'test'
-            class_path = self._output_path / split_path / class_type
+            class_path = self._output_path / f"{self._set}_{split_path}" / class_type
 
             output_file_path = class_path / f"{str(file.name).split('.')[0]}.png"
-            print(output_file_path)
-            if  class_type in ALLOWED_CLASSES and file.name in metadata.index:
+
+            if  class_type in ALLOWED_CLASSES and file.name in self._metadata.index:
                 if not os.path.exists(class_path):
                     os.makedirs(class_path)
             
 
                 waveform, sample_rate = torchaudio.load(file)
 
-                waveform = self._reshape_audio(waveform)
+                waveform = self._reshape_audio(waveform, file.name)
                 waveform, resampled_rate = self._downsampling(waveform, sample_rate)
                 waveform = self._butterworth(waveform, resampled_rate)
                 
                 self._mel_specgram(waveform, sample_rate=resampled_rate, save_path=output_file_path)
+                print(output_file_path)
            
 if __name__ == '__main__': 
 
-    wav_path = './Data/set_a'
+    wav_path = './Data/set_b'
 
     Audio_Features(output_path='./Data', data_path=wav_path)
