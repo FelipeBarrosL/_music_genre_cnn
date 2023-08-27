@@ -10,5 +10,5 @@ The dataset select can be downloaded at this repo under the folder Data or in th
 >> https://www.kaggle.com/datasets/kinguistics/heartbeat-soundsEN  
 
 --------
-Run features.py and pass data_path with ./Data/set_a or ./Data/set_b
+Run features.py and pass data_path with ./Data/set_a  
 Run cnn_model.py for training and testing the data
