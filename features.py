@@ -9,7 +9,8 @@ import pandas as pd
 import torch
 from plot_audio import plot_mel_specgram
 
-ALLOWED_CLASSES = ['normal', 'murmur', 'extrahls', 'artifact']
+ALLOWED_CLASSES_SET_A = ['normal', 'murmur', 'extrahls', 'artifact'] # for set_a
+ALLOWED_CLASSES_SET_B = ['normal', 'murmur', 'extrastole', 'Bunlabelledtest'] # for set_b
 
 class Audio_Features:
     """
@@ -31,7 +32,7 @@ class Audio_Features:
         self._output_path = Path(output_path)
         self._raw_data = Path(data_path)
         self._set = data_path.split("/")[-1]
-        self._metadata_path = Path("./Data/metadata.csv")
+        self._metadata_path = Path(f"./Data/{self._set}_metadata.csv")
         #random_filenames = self._get_filenames()
         self._save_features()
 
@@ -157,7 +158,9 @@ class Audio_Features:
 
             output_file_path = class_path / f"{str(file.name).split('.')[0]}.png"
 
-            if  class_type in ALLOWED_CLASSES and file.name in self._metadata.index:
+            print(class_type)
+
+            if  class_type in ALLOWED_CLASSES_SET_B and file.name in self._metadata.index:
                 if not os.path.exists(class_path):
                     os.makedirs(class_path)
             
@@ -173,6 +176,6 @@ class Audio_Features:
            
 if __name__ == '__main__': 
 
-    wav_path = './Data/set_b'
+    wav_path = './Data/set_a'
 
     Audio_Features(output_path='./Data', data_path=wav_path)
